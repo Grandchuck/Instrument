@@ -1,0 +1,146 @@
+//The speed of the motors is determined by the steptime,
+//which is the delay between steps.
+//The shorter the delay, the higher the rpm.
+
+int steptime = 1;        //Declared here makes the variables global
+int curve = 198;
+float base = 1;
+float expon = -0.8;
+double rpm = 1;
+#include<math.h>
+#include<LiquidCrystal.h>
+LiquidCrystal lcd(P2_0, P2_1, P2_2, P2_3, P2_4, P2_5);  //Port 2 controls the LCD
+
+void setup()
+{
+  P1DIR = 0xFF;       //All 8 pins of port 1 are set as outputs
+  lcd.begin(16, 2);
+  lcd.clear();
+  lcd.print("Charles Schuler");
+  lcd.setCursor(0,1);
+  lcd.print("Series Editor");
+  delay(3000);
+}
+
+void loop()
+{
+  steptime = random (1, 50);    //Make steptime a random number between 1 and 50
+  lcd.clear();
+  lcd.print("Motor 1 CCW");
+  float base = float(steptime); //Steptime is converted to a floating number
+  rpm = curve * powf(base, expon);  //Speed is a power function based on steptime and an exponent
+  lcd.setCursor(0,1);
+  rpm = (int)rpm;
+  lcd.print("rpm = ");
+  lcd.print(rpm);
+  for (int j = 0; j < 50; j++) {
+    P1OUT = 0x0C;     // The following step sequence gives CCW rotation
+    delay(steptime);  //Motor 1 is on (0C,06,03,09)
+    P1OUT = 0x06;
+    delay(steptime);
+    P1OUT = 0x03;
+    delay(steptime);
+    P1OUT = 0x09;
+    delay(steptime);
+  }
+
+  delay(1000);        //Delay 1 second after one CCW rotation
+  {
+    {
+      steptime = random (1, 50);  //Make steptime a random number between 1 and 50
+      lcd.clear();
+      lcd.print("Motor 1 CW");
+      float base = float(steptime);
+      rpm = curve * powf(base, expon);
+      lcd.setCursor(0,1);
+      rpm = (int)rpm;
+      lcd.print("rpm = ");
+      lcd.print(rpm);
+      for (int j = 0; j < 50; j++) {
+        P1OUT = 0x03;       //This sequence gives CW rotation
+        delay(steptime);    //Motor 1 is on (03,06,0C,09)
+        P1OUT = 0x06;   
+        delay(steptime);
+        P1OUT = 0x0C;
+        delay(steptime);
+        P1OUT = 0x09;
+        delay(steptime);
+      }
+      delay(1000);      //Delay 1 second after one CW rotation
+      {
+        {
+          steptime = random (1, 50);  //Make steptime a random number between 1 and 50
+          lcd.clear();
+          lcd.print("Motor 2 CCW");
+          float base = float(steptime);
+          rpm = curve * powf(base, expon);
+          lcd.setCursor(0,1);
+          rpm = (int)rpm;
+          lcd.print("rpm = ");
+          lcd.print(rpm);
+          for (int j = 0; j < 50; j++) {
+            P1OUT = 0xC0;     // This sequence gives CCW rotation
+            delay(steptime);  //Motor 2 is on (C0,60,30,90)
+            P1OUT = 0x60;
+            delay(steptime);
+            P1OUT = 0x30;
+            delay(steptime);
+            P1OUT = 0x90;
+            delay(steptime);
+          }
+
+          delay(1000);        //Delay 1 second after one CCW rotation
+          {
+            {
+              steptime = random (1, 50);  //Make steptime a random number between 1 and 50
+              lcd.clear();
+              lcd.print("Motor 2 CW");
+              float base = float(steptime);
+              rpm = curve * powf(base, expon);
+              lcd.setCursor(0,1);
+              rpm = (int)rpm;
+              lcd.print("rpm = ");
+              lcd.print(rpm);
+              for (int j = 0; j < 50; j++) {
+                P1OUT = 0x30;     //This sequence gives CW rotation
+                delay(steptime);  //Motor 2 is on (30,60,C0,90)
+                P1OUT = 0x60;   
+                delay(steptime);
+                P1OUT = 0xC0;
+                delay(steptime);
+                P1OUT = 0x90;
+                delay(steptime);
+              }
+              delay(1000);      //Delay 1 second after one full CW rotation
+              {
+                {
+                  steptime = 1;   //The following does 6 fast CW revs of both motors
+                  lcd.clear();
+                  lcd.print("Both motors CW");
+                  lcd.setCursor(0,1);
+                  lcd.print("max. speed = 200");
+                  for (int j = 0; j < 300; j++) {
+                    P1OUT = 0x33;   //Both motors are on: (33,66,CC,99)
+                    delay(steptime);
+                    P1OUT = 0x66;
+                    delay(steptime);
+                    P1OUT = 0xCC;
+                    delay(steptime);
+                    P1OUT = 0x99;
+                    delay(steptime);
+                  }
+                  P1OUT = 0x00;    //Turn both off for the long delay coming next (save the current!)
+                  lcd.clear();
+                  lcd.print("Now we loop");
+                  lcd.setCursor(0,1);  //Go to the next line of the display
+                  lcd.print("& do it again");
+                  delay(3000);      //Delay 1 second after 4 fast CW revs & loop back to beginning
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
